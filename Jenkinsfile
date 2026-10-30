@@ -13,17 +13,19 @@ pipeline {
 
         stage('SonarQube Code Analysis') {
             steps {
-                echo 'Running SonarQube analysis...'
+                script {
+                    def scannerHome = tool 'SonarScanner'
 
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                        ${tool 'SonarScanner'}/bin/sonar-scanner \
-                        -Dsonar.projectKey=devops-cicd-project \
-                        -Dsonar.projectName="DevOps CI/CD Project" \
-                        -Dsonar.sources=. \
-                        -Dsonar.sourceEncoding=UTF-8 \
-                        -Dsonar.exclusions=.git/**,Jenkinsfile,Dockerfile
-                    '''
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=devops-cicd-project \
+                            -Dsonar.projectName="DevOps CI/CD Project" \
+                            -Dsonar.sources=. \
+                            -Dsonar.sourceEncoding=UTF-8 \
+                            -Dsonar.exclusions=.git/**,Jenkinsfile,Dockerfile
+                        """
+                    }
                 }
             }
         }
@@ -73,7 +75,6 @@ pipeline {
                 '''
             }
         }
-
     }
 
     post {
@@ -87,7 +88,6 @@ pipeline {
         failure {
             echo '========================================'
             echo ' CI/CD PIPELINE FAILED ❌'
-            echo 'Check the failed stage above.'
             echo '========================================'
         }
 
